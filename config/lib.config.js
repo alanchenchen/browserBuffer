@@ -5,7 +5,7 @@
 module.exports = {
     libraryName: '@alanchenchen/browserbuffer', // npm包名，首字母不允许大写，支持驼峰和短杆写法
     bundleName: 'BrowserBuffer', // 打包后文件名，也是UMD script直接引入挂在windows对象的key名
-    version: '0.0.1', // 版本号
+    version: '0.1.0', // 版本号
     description: 'A simple implementation for browser to switch string between buffer', // 包描述
     keywords: ['BrowserBuffer', 'browser', 'buffer', 'download', 'ArrayBuffer'], // 关键词
     author: 'Alan Chen', // 作者

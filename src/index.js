@@ -1,7 +1,13 @@
 /**
  * @description 插件的入口模块。webpack的entry
  */
-module.exports = class BrowserBuffer {
+/**!
+ * @name ApiModule
+ * @author Alan chen 
+ * @since 2019/05/07
+ * @license 996.ICU
+ */
+ module.exports = class BrowserBuffer {
     constructor() {
         this._init()
         this.version = require('../package.json').version
@@ -15,6 +21,8 @@ module.exports = class BrowserBuffer {
      */
     _init() {
         this._downloadElement = document.createElement('a')
+        this._uploadElement = document.createElement('input')
+        this._uploadElement.type = 'file'
     }
 
     /**
@@ -71,6 +79,78 @@ module.exports = class BrowserBuffer {
     }
 
     /**
+     * 通过打开系统dialog读取本地文件数据
+     * 
+     * @param {Object} opt
+     * @param {Array} opt.accept 允许用户上传任何类型的文件，但不能完全限制，数组项可以是MIME信息，也可以是文件后缀名，还可以是image/*这种，默认允许所有类型
+     * @param {Boolean} opt.multiple 是否支持多选，默认不支持，如果支持，可以通过键盘Shift或Control来多选
+     * @param {String} opt.encode 文件的编码格式，utf8、base64和binary字符串其中之一，默认为base64
+     * @returns {Promise} reslove一个数组，数组包含每个文件的数据对象，catch一个错误对象 
+     */
+    readFile({
+        accept=['*'],
+        multiple=false,
+        encode='base64'
+    } = {}) {
+        this._uploadElement.accept = accept.join(',')
+        this._uploadElement.multiple = multiple
+
+        const readOneFile = (file, encode='base64') => {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader()
+                let fn = null
+                switch (encode) {
+                    case 'utf8': 
+                        fn = 'readAsText'
+                        break
+                    case 'base64':
+                        fn = 'readAsDataURL'
+                        break
+                    case 'binary':
+                        fn = 'readAsArrayBuffer'
+                        break
+                    default:
+                        fn = 'readAsDataURL'
+                }
+                reader[fn](file)
+                reader.onload = () => {
+                    let result = reader.result
+                    if(encode == 'base64') {
+                        result = reader.result.split('base64,')[1]
+                    }
+                    resolve(result)
+                }
+                reader.onerror = () => {
+                    reader.abort()
+                    reject('some erros occured')
+                }
+            })
+        }
+
+        return new Promise((resolve, reject) => {
+            this._uploadElement.onchange = async (e) => {
+                let fileData = []
+                let fileslist = this._uploadElement.files || e.path[0].files
+                try {
+                    for(let key of Object.keys(fileslist)) {
+                        fileData[key] = {}
+                        fileData[key].name = fileslist[key].name
+                        fileData[key].type = fileslist[key].type
+                        fileData[key].size = fileslist[key].size
+                        fileData[key].lastModified = fileslist[key].lastModified
+                        fileData[key].lastModifiedDate = fileslist[key].lastModifiedDate
+                        fileData[key].data = await readOneFile(fileslist[key], encode)
+                    }
+                    resolve(fileData)
+                } catch (error) {
+                    reject(error)
+                }
+            }
+            this._uploadElement.click()
+        })
+    }
+
+    /**
      * 写入数据到本地文件
      * 
      * @param {Object} opt
@@ -79,8 +159,9 @@ module.exports = class BrowserBuffer {
      * @param {String | Object | Blob | ArrayBuffer} opt.data 写入的数据
      * @param {String} opt.MIME 仅当filename不带后缀名时生效，决定转换后数据的文件类型，默认为text/plain，txt文本。filename如果带上后缀名，则会覆盖MIME。
      * @param {String} opt.charset 文件的编码格式，默认为utf8
+     * @returns {Promise} 因为是async函数，所以返回一个promise
      */
-    writeFile({
+    async writeFile({
         filename='', 
         dataPath='',
         data, 
@@ -107,7 +188,8 @@ module.exports = class BrowserBuffer {
             else {
                 throw new Error('data must be string or object or Blob or ArrayBuffer')
             }
-            this._saveBuffer(buf, filename, charset)
+            
+            await this._saveBuffer(buf, filename, charset)
         }
     }
 
