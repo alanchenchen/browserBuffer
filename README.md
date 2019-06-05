@@ -8,7 +8,7 @@
 A simple implementation for browser to switch string between buffer
 > Author：Alan Chen
 
-> Version: 0.1.0
+> Version: 0.1.1
 
 > Date: 2019/06/05
 

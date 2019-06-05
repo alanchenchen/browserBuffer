@@ -1,6 +1,6 @@
 {
   "name": "@alanchenchen/browserbuffer",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "author": "Alan Chen",
   "description": "A simple implementation for browser to switch string between buffer",
   "main": "dist/BrowserBuffer.js",
@@ -9,7 +9,8 @@
     "browser",
     "buffer",
     "download",
-    "ArrayBuffer"
+    "ArrayBuffer",
+    "upload"
   ],
   "license": "996.ICU",
   "private": false,
