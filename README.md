@@ -8,9 +8,9 @@
 A simple implementation for browser to switch string between buffer
 > Author：Alan Chen
 
-> Version: 0.1.1
+> Version: 0.1.2
 
-> Date: 2019/06/05
+> Date: 2019/09/27
 
 > 浏览器端js在字符串和ArrayBuffer之间转换的插件
 
@@ -29,8 +29,8 @@ A simple implementation for browser to switch string between buffer
 * 构造器无参数，必须使用new操作符生成一个实例。
 
 ### Instance Methods
-1. from `[function(String | Blob | ArrayBuffer) ArrayBuffer]`，将一个字符串(或Blob对象、或ArrayBuffer)转成一个ArrayBuffer，一个参数。返回一个Promise, reslove一个ArrayBuffer
-2. toString `[function(String | Blob | ArrayBuffer, Object) String]`，将一个字符串(或Blob对象、或ArrayBuffer)转成一个utf8、base64或dataURL三种格式之一的字符串，两个参数。返回一个Promise，reslove一个String。第二个参数为一个可选对象，如下：
+1. from `[function(String | Blob | ArrayBuffer) ArrayBuffer, String]`，将一个字符串(或Blob对象、或ArrayBuffer)转成一个ArrayBuffer，2个参数，参数而可选utf8和base64。返回一个Promise, reslove一个ArrayBuffer
+2. toString `[function(Blob | ArrayBuffer, Object) String]`，将一个Blob对象、或ArrayBuffer转成一个utf8、base64或dataURL三种格式之一的字符串，两个参数。返回一个Promise，reslove一个String。第二个参数为一个可选对象，如下：
     * encode `[String]`，可选，转换后的字符串编码格式，有utf8、base64和dataURL三种可选，默认为utf8
     * MIME `[String]`，可选，仅当编码格式为dataURL生效，决定转换后数据的文件类型，默认为text/plain，txt文本
     * charset `[String]`，可选，仅当编码格式为dataURL生效，决定转换后数据的编码类型，默认为utf8编码
@@ -47,14 +47,14 @@ A simple implementation for browser to switch string between buffer
 ## Example
 * [buffer转换例子](./example/bufferAndString.js)
 * [读取文件例子](./example/uploadFile.js)
-* [下载文件例子](./example/download.js)
+* [下载文件例子](./example/download.js) 将base64字符串下载到图片需要先转成arraybuffer！
 
 ## Attention
 1. 由于string和ArrayBuffer之间的转换依赖于FileReader，所以导致form和toString方法只能返回一个Promise，可以搭配Async函数来获取返回值。
 2. 因为FileReader的存在，让浏览器端js操作buffer转码越来越方便，所以我并没有手动通过unicde值来实现(我实现了一个插件不借助FileReader来转换)。
 3. 通过插件转换后的ArrayBuffer均遵循utf8编码规范，所以ASCII字符(英文字母、数字和一些符号)都只占1个字节，汉字占3个字节，这和nodejs里的buffer实现完全一致。所以前端可以直接把ArrayBuffer通过流的形式传给后台，解析起来很容易。但是需要区分的是js本身存储字符串是遵循的utf16规范。
 4. 插件借助FileReader只能操作buffer转码，如果需要操作buffer内存空间数据，则只能通过TypedArray或者DataView实现，nodejs里则完全可以通过buffer模块实现，这一点区别需要注意。
-5. 插件实例的所有方法均会返回Promise，所以都建议使用async函数。
+5. toString方法虽然也可以传入字符串，但是只建议arryabuffer，而且wirteFile方法的data虽然支持字符串，但是base64字符串不会转换成二进制数据写入文件，所以如果需要将base64的数据写入非文本，则需要先from，然后再writeFile。
 6. 读取文件由于浏览器安全考虑，所以只能通过用户手动上传，所以无法直接跟nodejs的readFile一致。读取文件方法因为不需要传入input标签，所以你可以在任何时候触发，你可以手动实现各种各样的上传功能。
 
 ## license

@@ -2,9 +2,9 @@
  * @description 插件的入口模块。webpack的entry
  */
 /**!
- * @name ApiModule
+ * @name BrowserBuffer
  * @author Alan chen 
- * @since 2019/05/07
+ * @since 2019/09/27
  * @license 996.ICU
  */
  module.exports = class BrowserBuffer {
@@ -197,20 +197,37 @@
      * 将一个字符串(或Blob对象、或ArrayBuffer)转成一个ArrayBuffer
      * 
      * @param {String | Blob | ArrayBuffer} data 需要转换的数据
+     * @param {String} encode 编码格式，默认是utf8，可选base64，需要区分utf8和base64转换的方式完全不同！
      * @returns {Promise} reslove一个ArrayBuffer，catch一个错误对象
      */
-    from(data) {
+    from(data, encode="utf8") {
         try {
             const blobData = new Blob([data])
             return new Promise((resolve, reject) => {
-                const file = new FileReader()
-                file.readAsArrayBuffer(blobData)
-                file.onload = () => {
-                    resolve(file.result)
-                }
-                file.onerror = () => {
-                    file.abort()
-                    reject('some erros occured')
+                if (encode === "utf8") {
+                    const file = new FileReader()
+                    file.readAsArrayBuffer(blobData)
+                    file.onload = () => {
+                        resolve(file.result)
+                    }
+                    file.onerror = () => {
+                        file.abort()
+                        reject('some erros occured')
+                    }
+                } else if (
+                    encode === "base64"
+                    && typeof data === "string"
+                ) {
+                    const ut8String = atob(data)
+                    let len = ut8String.length
+                    const byteArr = new Uint8Array(len)
+
+                     while(len--) {
+                        byteArr[len] = ut8String.charCodeAt(len)
+                     }
+                    resolve(byteArr)
+                } else {
+                    throw new Error("encode must be utf8 or base64")
                 }
             })
 
@@ -220,9 +237,9 @@
     }
 
     /**
-     * 将一个字符串(或Blob对象、或ArrayBuffer)转成一个utf8、base64或dataURL三种格式之一的字符串
+     * 将一个Blob对象、或ArrayBuffer转成一个utf8、base64或dataURL三种格式之一的字符串
      * 
-     * @param {String | Blob | ArrayBuffer} data 需要转换的数据 
+     * @param {Blob | ArrayBuffer} data 需要转换的数据 
      * @param {Object} opt
      * @param {String} opt.encode 转换后的字符串编码格式，有utf8、base64和dataURL三种可选，默认为utf8
      * @param {String} opt.MIME 仅当编码格式为dataURL生效，决定转换后数据的文件类型，默认为text/plain，txt文本

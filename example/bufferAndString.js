@@ -3,9 +3,14 @@ const browserBuffer = new BrowserBuffer()
 
 const fn = async () => {
     /**
-     * @example 将字符串转成ArrayBuffer
+     * @example 将utf8字符串转成ArrayBuffer
      */
     const buf = await browserBuffer.from('测试文字2333测试数字=--测试符号')
+
+    /**
+     * @example 将base64字符串转成ArrayBuffer
+     */
+    const buf_1 = await browserBuffer.from('Y2hlbjEyMysr', 'base64')
 
     /**
      * @example 将ArrayBuffer转成纯文本

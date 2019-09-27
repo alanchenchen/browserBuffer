@@ -2,12 +2,24 @@ const BrowserBuffer = require('../src/index')
 const browserBuffer = new BrowserBuffer()
 
 /**
- * @example 将字符串下载到一个txt文件
+ * @example 将utf8字符串下载到一个txt文件
  */
 browserBuffer.writeFile({
     filename: '测试',
     data: '一段测试文本...'
 })
+
+/**
+ * @example 将base64字符串下载到一个png文件，如果直接给data传base64字符串，下载下来的png图片会有问题，因为相当于只是把字符串写入了图片而不是二进制写入到图片
+ */
+browserBuffer
+    .from('Y2hlbjEyMysr', 'base64')
+    .then(data => {
+        browserBuffer.writeFile({
+            filename: '测试.png',
+            data
+        })
+    })
 
 /**
  * @example 将对象下载到一个json文件
