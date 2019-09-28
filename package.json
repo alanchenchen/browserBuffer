@@ -50,7 +50,7 @@
     "webpack": "^3.8.1"
   },
   "engines": {
-    "node": ">= v12.8.1"
+    "node": ">= v10.15.3"
   },
   "babel": {
     "presets": [
