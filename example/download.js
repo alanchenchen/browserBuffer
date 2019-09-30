@@ -17,7 +17,8 @@ browserBuffer
     .then(data => {
         browserBuffer.writeFile({
             filename: '测试.png',
-            data
+            // 因为base64字符串转成的是unit8Array类型，需要手动转成blob
+            data: new Blob(data)
         })
     })
 
